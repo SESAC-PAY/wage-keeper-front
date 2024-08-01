@@ -10,21 +10,24 @@ import {
   Platform,
 } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { WageKeeperIcon } from "@/components/WageKeeperIcon";
 import { fetchSentence } from "@/components/chat/fetchSentence";
 import { Message, ChatState } from "@/shared/types/messages";
-import { useRecoilState } from "recoil";
+import { useRecoilState, useResetRecoilState } from "recoil";
 import { chatState } from "@/shared/recoil/messages";
 import { isStepDone } from "@/components/chat/isStepDone";
+import { fetchWorkspace } from "@/components/chat/fetchWorkspace";
 
 export default function ChatScreen() {
   const [inputText, setInputText] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [chat, setChat] = useRecoilState(chatState);
+  const resetChat = useResetRecoilState(chatState);
   const navigation = useNavigation();
   const scrollViewRef = useRef<ScrollView>(null);
   const [isFirst, setIsFirst] = useState(true);
+
   useEffect(() => {
     navigation.setOptions({
       title: `Step ${chat.step}`,
@@ -33,13 +36,23 @@ export default function ChatScreen() {
 
     const initFetch = async () => {
       setLoading(true);
-      await fetchSentence(isFirst, 1);
+      await fetchWorkspace(setChat);
+      await fetchSentence(isFirst, 1, setChat, chat);
       setLoading(false);
       setIsFirst(false);
     };
 
     initFetch();
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        // 화면을 벗어날 때 상태 초기화
+        resetChat();
+      };
+    }, [resetChat]),
+  );
 
   useEffect(() => {
     if (scrollViewRef.current) {
@@ -64,13 +77,17 @@ export default function ChatScreen() {
       };
       setChat((prevChat) => {
         const updatedChat = { ...prevChat };
-        (updatedChat[`step${chat.step}`] as Message[]).push(newMessage);
+        const stepKey = `step${chat.step}` as keyof ChatState;
+        if (!Array.isArray(updatedChat[stepKey])) {
+          updatedChat[stepKey] = [] as Message[];
+        }
+        (updatedChat[stepKey] as Message[]).push(newMessage);
         return updatedChat;
       });
       setInputText("");
       setLoading(true);
 
-      await fetchSentence(isFirst, chat.step);
+      await fetchSentence(isFirst, chat.step, setChat, chat);
 
       if (await isStepDone()) {
         setIsFirst(true);
