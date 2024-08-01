@@ -9,7 +9,6 @@ export const fetchSentence = async (
   chat: ChatState,
 ) => {
   try {
-    alert(`${chat.workspace}`);
     const response = await client.get(
       `/api/message/stream/${chat.workspace}/${step - 1}/${isFirst}`,
     );

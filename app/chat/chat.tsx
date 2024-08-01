@@ -37,7 +37,6 @@ export default function ChatScreen() {
     const initFetch = async () => {
       setLoading(true);
       await fetchWorkspace(setChat);
-      await fetchSentence(isFirst, 1, setChat, chat);
       setLoading(false);
       setIsFirst(false);
     };
@@ -45,10 +44,20 @@ export default function ChatScreen() {
     initFetch();
   }, []);
 
+  useEffect(() => {
+    const fetchInitialSentence = async () => {
+      if (chat.workspace !== -1) {
+        await fetchSentence(isFirst, 1, setChat, chat);
+        alert(chat);
+      }
+    };
+
+    fetchInitialSentence();
+  }, [chat.workspace]);
+
   useFocusEffect(
     React.useCallback(() => {
       return () => {
-        // 화면을 벗어날 때 상태 초기화
         resetChat();
       };
     }, [resetChat]),
