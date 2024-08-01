@@ -35,7 +35,7 @@ export default function ChatScreen() {
 
   useEffect(() => {
     navigation.setOptions({
-      title: `Step ${chat.step}`,
+      title: `진정서 작성을 도와드릴게요!`,
       headerTitleAlign: "center",
     });
 
