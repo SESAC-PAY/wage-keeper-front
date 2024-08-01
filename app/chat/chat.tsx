@@ -9,7 +9,9 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { WageKeeperIcon } from "@/components/WageKeeperIcon";
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState([
@@ -20,6 +22,10 @@ export default function ChatScreen() {
   const [step, setStep] = useState(1);
 
   const navigation = useNavigation();
+
+  const onClickMic = () => {
+    alert("마이크 누름!");
+  };
 
   const handleSend = () => {
     if (inputText.trim()) {
@@ -39,8 +45,9 @@ export default function ChatScreen() {
         ]);
         setLoading(false);
 
-        // Update the step
-        setStep((prevStep) => prevStep + 1);
+        if (step < 3) {
+          setStep((prevStep) => prevStep + 1);
+        }
       }, 2000);
     }
   };
@@ -54,17 +61,18 @@ export default function ChatScreen() {
 
   const getContainerStyle = (containerStep: number) => {
     return {
-      backgroundColor: step == containerStep ? "#E7EFF6" : "#FAFAFA",
-      borderRadius: 10,
-      padding: 10,
+      backgroundColor: step === containerStep ? "#E7EFF6" : "#FAFAFA",
+      borderRadius: 20,
+      paddingHorizontal: 20,
       marginVertical: 5,
+      paddingVertical: 10,
       alignItems: "center",
     };
   };
 
   const getTextStyle = (containerStep: number) => {
     return {
-      color: step == containerStep ? "#4894FE" : "#8696BB",
+      color: step === containerStep ? "#4894FE" : "#8696BB",
       fontSize: 16,
       fontWeight: "bold",
     };
@@ -90,31 +98,47 @@ export default function ChatScreen() {
         style={styles.chatContainer}
         contentContainerStyle={{ paddingBottom: 60 }}
       >
-        {messages.map((message) => (
-          <View
-            key={message.id}
-            style={[
-              styles.messageContainer,
-              message.sender === "user"
-                ? styles.userMessage
-                : styles.botMessage,
-            ]}
-          >
-            <Text style={styles.messageText}>{message.text}</Text>
+        {messages.map((message, index) => (
+          <View key={message.id}>
+            {(index % 2 === 0 || message.sender === "bot") && (
+              <WageKeeperIcon />
+            )}
+            <View
+              style={[
+                styles.messageContainer,
+                message.sender === "user"
+                  ? styles.userMessage
+                  : styles.botMessage,
+              ]}
+            >
+              <Text style={styles.messageText}>{message.text}</Text>
+            </View>
           </View>
         ))}
         {loading && (
-          <View style={[styles.messageContainer, styles.botMessage]}>
-            <Text style={styles.messageText}>...</Text>
+          <View>
+            <WageKeeperIcon />
+            <View style={[styles.messageContainer, styles.botMessage]}>
+              <Text style={styles.messageText}>...</Text>
+            </View>
           </View>
         )}
       </ScrollView>
       <View style={styles.inputContainer}>
+        <TouchableOpacity onPress={onClickMic}>
+          <Ionicons
+            name="mic"
+            size={24}
+            style={{ paddingHorizontal: 5, color: "#8696BB" }}
+          />
+        </TouchableOpacity>
         <TextInput
           style={styles.input}
           value={inputText}
           onChangeText={setInputText}
-          placeholder="메시지를 입력하세요..."
+          placeholder="무엇이든 물어보세요!"
+          placeholderTextColor="#8696BB"
+          multiline
         />
         <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
           <Text style={styles.sendButtonText}>전송</Text>
@@ -130,7 +154,7 @@ const styles = StyleSheet.create({
   },
   stepContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
+    justifyContent: "space-between",
     padding: 10,
   },
   chatContainer: {
@@ -139,9 +163,10 @@ const styles = StyleSheet.create({
   },
   messageContainer: {
     marginVertical: 5,
+    marginHorizontal: 15,
     padding: 10,
     borderRadius: 10,
-    maxWidth: "80%",
+    maxWidth: "70%",
   },
   userMessage: {
     alignSelf: "flex-end",
@@ -171,10 +196,13 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 40,
+    // minHeight: 40,
+    // maxHeight: 100,
     borderColor: "#E0E0E0",
     borderWidth: 1,
     borderRadius: 20,
-    paddingHorizontal: 10,
+    padding: 10,
+    flexWrap: "wrap",
   },
   sendButton: {
     marginLeft: 10,
