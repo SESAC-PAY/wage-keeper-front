@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Text, StyleSheet, View, Dimensions, TextInput, Image, TouchableOpacity } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
+import { SERVER_URL } from '@/shared/constants';
 
 const initialCompanyLocation = {
   latitude: 37.5665256,
@@ -25,7 +26,7 @@ export default function ExploreScreen() {
 
   const handleSearch = () => {
     if (searchWord) {
-      fetch(`https://projectpanda.ngrok.io/api/company?searchWord=${searchWord}`)
+      fetch(`${SERVER_URL}/api/company?searchWord=${searchWord}`)
         .then(response => response.json())
         .then(data => {
           if (data.status === 200) {
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
     bottom: '10%',
     left: '5%',
     right: '5%',
-    height: '20%',
+    height: '15%',
     width: '90%',
     zIndex: 1,
     alignSelf: 'center',
@@ -162,6 +163,7 @@ const styles = StyleSheet.create({
     padding: 10,
     elevation: 5,
   },
+  
   infoDetails: {
     flexDirection: 'row',
     alignItems: 'center',
