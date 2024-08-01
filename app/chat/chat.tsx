@@ -10,18 +10,18 @@ import {
   Platform,
 } from "react-native";
 import { AntDesign, Ionicons } from "@expo/vector-icons";
-import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { WageKeeperIcon } from "@/components/WageKeeperIcon";
 import { fetchSentence } from "@/components/chat/fetchSentence";
-import { Message, ChatState } from "@/shared/types/messages";
-import { useRecoilState, useResetRecoilState } from "recoil";
+import { useRecoilState, useResetRecoilState, useRecoilValue } from "recoil";
 import { chatState } from "@/shared/recoil/messages";
-import { isStepDone } from "@/components/chat/isStepDone";
 import { fetchWorkspace } from "@/components/chat/fetchWorkspace";
+import { isStepDone } from "@/components/chat/isStepDone";
 
 export default function ChatScreen() {
   const [inputText, setInputText] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
+  const [messages, setMessages] = useState<string[]>([]);
   const [chat, setChat] = useRecoilState(chatState);
   const resetChat = useResetRecoilState(chatState);
   const navigation = useNavigation();
@@ -37,37 +37,20 @@ export default function ChatScreen() {
     const initFetch = async () => {
       setLoading(true);
       await fetchWorkspace(setChat);
-      setLoading(false);
+      const sentence = await fetchSentence(isFirst, 1, chat.workspace);
+      setMessages((prevMessages) => [...prevMessages, sentence]);
       setIsFirst(false);
+      setLoading(false);
     };
 
     initFetch();
   }, []);
 
   useEffect(() => {
-    const fetchInitialSentence = async () => {
-      if (chat.workspace !== -1) {
-        await fetchSentence(isFirst, 1, setChat, chat);
-        alert(chat);
-      }
-    };
-
-    fetchInitialSentence();
-  }, [chat.workspace]);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      return () => {
-        resetChat();
-      };
-    }, [resetChat]),
-  );
-
-  useEffect(() => {
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
-  }, [chat]);
+  }, [messages]);
 
   const onClickMic = () => {
     alert("마이크 누름!");
@@ -79,28 +62,23 @@ export default function ChatScreen() {
 
   const handleSend = async () => {
     if (inputText.trim()) {
-      const newMessage: Message = {
-        id: Date.now(),
-        text: inputText,
-        sender: "user",
-      };
-      setChat((prevChat) => {
-        const updatedChat = { ...prevChat };
-        const stepKey = `step${chat.step}` as keyof ChatState;
-        if (!Array.isArray(updatedChat[stepKey])) {
-          updatedChat[stepKey] = [] as Message[];
-        }
-        (updatedChat[stepKey] as Message[]).push(newMessage);
-        return updatedChat;
-      });
+      setMessages((prevMessages) => [...prevMessages, inputText]);
       setInputText("");
       setLoading(true);
 
-      await fetchSentence(isFirst, chat.step, setChat, chat);
+      const sentence = await fetchSentence(isFirst, chat.step, chat.workspace);
+      setMessages((prevMessages) => [...prevMessages, sentence]);
 
-      if (await isStepDone()) {
+      if (isStepDone(sentence)) {
         setIsFirst(true);
+        setChat((prevChat) => ({
+          ...prevChat,
+          step: prevChat.step + 1,
+        }));
+      } else {
+        setIsFirst(false);
       }
+
       setLoading(false);
     }
   };
@@ -122,8 +100,6 @@ export default function ChatScreen() {
       },
     ];
   };
-
-  const currentMessages = (chat[`step${chat.step}`] as Message[]) || [];
 
   return (
     <KeyboardAvoidingView
@@ -153,18 +129,16 @@ export default function ChatScreen() {
         contentContainerStyle={{ paddingBottom: 60 }}
         ref={scrollViewRef}
       >
-        {currentMessages.map((message) => (
-          <View key={message.id}>
-            {message.sender === "bot" && <WageKeeperIcon />}
+        {messages.map((message, index) => (
+          <View key={index}>
+            {index % 2 === 0 && <WageKeeperIcon />}
             <View
               style={[
                 styles.messageContainer,
-                message.sender === "user"
-                  ? styles.userMessage
-                  : styles.botMessage,
+                index % 2 === 1 ? styles.userMessage : styles.botMessage,
               ]}
             >
-              <Text style={styles.messageText}>{message.text}</Text>
+              <Text style={styles.messageText}>{message}</Text>
             </View>
           </View>
         ))}

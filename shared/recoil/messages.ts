@@ -6,10 +6,6 @@ export const chatState = atom<ChatState>({
   default: {
     workspace: -1,
     step: 1,
-    step1: [],
-    step2: [],
-    step3: [],
-    step4: [],
-    step5: [],
+    chats: [],
   },
 });

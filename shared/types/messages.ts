@@ -8,10 +8,6 @@ export interface Message {
 export interface ChatState {
   workspace: number;
   step: number;
-  step1: Message[];
-  step2: Message[];
-  step3: Message[];
-  step4: Message[];
-  step5: Message[];
+  chats: Message[];
   [key: string]: any;
 }
