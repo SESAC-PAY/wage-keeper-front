@@ -12,17 +12,40 @@ import {
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { WageKeeperIcon } from "@/components/WageKeeperIcon";
+import { fetchSentence } from "@/components/chat/fetchSentence";
+import { Message, ChatState } from "@/shared/types/messages";
+import { useRecoilState } from "recoil";
+import { chatState } from "@/shared/recoil/messages";
+import { isStepDone } from "@/components/chat/isStepDone";
 
 export default function ChatScreen() {
-  const [messages, setMessages] = useState([
-    { id: 1, text: "안녕하세요! 무엇을 도와드릴까요?", sender: "bot" },
-  ]);
-  const [inputText, setInputText] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(1);
-
+  const [inputText, setInputText] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [chat, setChat] = useRecoilState(chatState);
   const navigation = useNavigation();
   const scrollViewRef = useRef<ScrollView>(null);
+  const [isFirst, setIsFirst] = useState(true);
+  useEffect(() => {
+    navigation.setOptions({
+      title: `Step ${chat.step}`,
+      headerTitleAlign: "center",
+    });
+
+    const initFetch = async () => {
+      setLoading(true);
+      await fetchSentence(isFirst, 1);
+      setLoading(false);
+      setIsFirst(false);
+    };
+
+    initFetch();
+  }, []);
+
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, [chat]);
 
   const onClickMic = () => {
     alert("마이크 누름!");
@@ -32,49 +55,35 @@ export default function ChatScreen() {
     alert("갤러리 누름!");
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (inputText.trim()) {
-      const newMessage = {
-        id: messages.length + 1,
+      const newMessage: Message = {
+        id: Date.now(),
         text: inputText,
         sender: "user",
       };
-      setMessages([...messages, newMessage]);
+      setChat((prevChat) => {
+        const updatedChat = { ...prevChat };
+        (updatedChat[`step${chat.step}`] as Message[]).push(newMessage);
+        return updatedChat;
+      });
       setInputText("");
       setLoading(true);
 
-      setTimeout(() => {
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { id: prevMessages.length + 1, text: "가짜 응답", sender: "bot" },
-        ]);
-        setLoading(false);
+      await fetchSentence(isFirst, chat.step);
 
-        if (step < 3) {
-          setStep((prevStep) => prevStep + 1);
-        }
-      }, 2000);
+      if (await isStepDone()) {
+        setIsFirst(true);
+      }
+      setLoading(false);
     }
   };
-
-  useEffect(() => {
-    navigation.setOptions({
-      title: `Step ${step}`,
-      headerTitleAlign: "center",
-    });
-  }, [step, navigation]);
-
-  useEffect(() => {
-    if (scrollViewRef.current) {
-      scrollViewRef.current.scrollToEnd({ animated: true });
-    }
-  }, [messages]);
 
   const getContainerStyle = (containerStep: number) => {
     return [
       styles.containerStep,
       {
-        backgroundColor: step === containerStep ? "#E7EFF6" : "#FAFAFA",
+        backgroundColor: chat.step === containerStep ? "#E7EFF6" : "#FAFAFA",
       },
     ];
   };
@@ -83,10 +92,12 @@ export default function ChatScreen() {
     return [
       styles.textStep,
       {
-        color: step === containerStep ? "#4894FE" : "#8696BB",
+        color: chat.step === containerStep ? "#4894FE" : "#8696BB",
       },
     ];
   };
+
+  const currentMessages = (chat[`step${chat.step}`] as Message[]) || [];
 
   return (
     <KeyboardAvoidingView
@@ -96,13 +107,19 @@ export default function ChatScreen() {
     >
       <View style={styles.stepContainer}>
         <View style={getContainerStyle(1)}>
-          <Text style={getTextStyle(1)}>고용주 정보</Text>
+          <Text style={getTextStyle(1)}>피해 사실</Text>
         </View>
         <View style={getContainerStyle(2)}>
-          <Text style={getTextStyle(2)}>피해 사실</Text>
+          <Text style={getTextStyle(2)}>증거 자료</Text>
         </View>
         <View style={getContainerStyle(3)}>
-          <Text style={getTextStyle(3)}>정보 등록</Text>
+          <Text style={getTextStyle(3)}>등록인 정보</Text>
+        </View>
+        <View style={getContainerStyle(4)}>
+          <Text style={getTextStyle(4)}>고용주 정보</Text>
+        </View>
+        <View style={getContainerStyle(5)}>
+          <Text style={getTextStyle(5)}>완료</Text>
         </View>
       </View>
       <ScrollView
@@ -110,11 +127,9 @@ export default function ChatScreen() {
         contentContainerStyle={{ paddingBottom: 60 }}
         ref={scrollViewRef}
       >
-        {messages.map((message, index) => (
+        {currentMessages.map((message) => (
           <View key={message.id}>
-            {(index % 2 === 0 || message.sender === "bot") && (
-              <WageKeeperIcon />
-            )}
+            {message.sender === "bot" && <WageKeeperIcon />}
             <View
               style={[
                 styles.messageContainer,
