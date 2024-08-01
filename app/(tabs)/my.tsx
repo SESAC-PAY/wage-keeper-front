@@ -18,6 +18,10 @@ const images = {
   uzbek: require("../../assets/images/uzbek.png"),
   cambodia: require("../../assets/images/cambo.png"),
   etc: require("../../assets/images/etc.png"),
+  main: require("../../assets/images/main.png"),
+  chatbutton: require("../../assets/images/chatbutton.png"),
+  workbutton: require("../../assets/images/workbutton.png"),
+  reviewbutton: require("../../assets/images/reviewbutton.png"),
 };
 
 export default function MyPageScreen() {

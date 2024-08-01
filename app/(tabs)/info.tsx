@@ -26,7 +26,7 @@ export default function InfoScreen() {
   };
 
   const getLanguageCode = (language: string | null): string => {
-    return language ? languageCodeMap[language] || 'en' : 'en'; 
+    return language ? languageCodeMap[language] || 'ko' : 'ko'; 
   };
 
   useEffect(() => {
