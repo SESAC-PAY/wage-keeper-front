@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Text,
   View,
@@ -9,7 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { WageKeeperIcon } from "@/components/WageKeeperIcon";
 
@@ -22,9 +22,14 @@ export default function ChatScreen() {
   const [step, setStep] = useState(1);
 
   const navigation = useNavigation();
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const onClickMic = () => {
     alert("마이크 누름!");
+  };
+
+  const onClickGallery = () => {
+    alert("갤러리 누름!");
   };
 
   const handleSend = () => {
@@ -59,29 +64,35 @@ export default function ChatScreen() {
     });
   }, [step, navigation]);
 
+  useEffect(() => {
+    if (scrollViewRef.current) {
+      scrollViewRef.current.scrollToEnd({ animated: true });
+    }
+  }, [messages]);
+
   const getContainerStyle = (containerStep: number) => {
-    return {
-      backgroundColor: step === containerStep ? "#E7EFF6" : "#FAFAFA",
-      borderRadius: 20,
-      paddingHorizontal: 20,
-      marginVertical: 5,
-      paddingVertical: 10,
-      alignItems: "center",
-    };
+    return [
+      styles.containerStep,
+      {
+        backgroundColor: step === containerStep ? "#E7EFF6" : "#FAFAFA",
+      },
+    ];
   };
 
   const getTextStyle = (containerStep: number) => {
-    return {
-      color: step === containerStep ? "#4894FE" : "#8696BB",
-      fontSize: 16,
-      fontWeight: "bold",
-    };
+    return [
+      styles.textStep,
+      {
+        color: step === containerStep ? "#4894FE" : "#8696BB",
+      },
+    ];
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 80} // Adjust this value as needed
     >
       <View style={styles.stepContainer}>
         <View style={getContainerStyle(1)}>
@@ -97,6 +108,7 @@ export default function ChatScreen() {
       <ScrollView
         style={styles.chatContainer}
         contentContainerStyle={{ paddingBottom: 60 }}
+        ref={scrollViewRef}
       >
         {messages.map((message, index) => (
           <View key={message.id}>
@@ -140,6 +152,13 @@ export default function ChatScreen() {
           placeholderTextColor="#8696BB"
           multiline
         />
+        <TouchableOpacity onPress={onClickGallery}>
+          <AntDesign
+            name="upload"
+            size={24}
+            style={{ paddingHorizontal: 5, color: "#8696BB" }}
+          />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
           <Text style={styles.sendButtonText}>전송</Text>
         </TouchableOpacity>
@@ -156,6 +175,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     padding: 10,
+  },
+  containerStep: {
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    marginVertical: 5,
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  textStep: {
+    fontSize: 16,
+    fontWeight: "bold",
   },
   chatContainer: {
     flex: 1,
@@ -184,6 +214,7 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     padding: 10,
     borderTopWidth: 1,
     borderTopColor: "#E0E0E0",
@@ -196,13 +227,12 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 40,
-    // minHeight: 40,
-    // maxHeight: 100,
     borderColor: "#E0E0E0",
     borderWidth: 1,
     borderRadius: 20,
     padding: 10,
     flexWrap: "wrap",
+    marginHorizontal: 5,
   },
   sendButton: {
     marginLeft: 10,
