@@ -13,7 +13,7 @@ import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { WageKeeperIcon } from "@/components/WageKeeperIcon";
 import { fetchSentence } from "@/components/chat/fetchSentence";
-import { useRecoilState, useResetRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState, useResetRecoilState } from "recoil";
 import { chatState } from "@/shared/recoil/messages";
 import { fetchWorkspace } from "@/components/chat/fetchWorkspace";
 import { postSentence } from "@/components/chat/postSentence";
@@ -106,6 +106,11 @@ export default function ChatScreen() {
         updatedMessages[updatedMessages.length - 1] += ` ${nextSentence}`;
       } else {
         setIsFirst(false);
+      }
+
+      if (chat.step === 5) {
+        const workspaceUrl = `https://projectpanda.ngrok.io/api/document/${chat.workspace}`;
+        updatedMessages[updatedMessages.length - 1] += ` ${workspaceUrl}`;
       }
 
       setMessages(updatedMessages);
