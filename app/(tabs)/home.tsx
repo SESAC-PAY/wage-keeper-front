@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
   ScrollView,
   Button,
+  TouchableOpacity,
 } from "react-native";
 import { ThemedText } from "@/components/ThemedText";
 
@@ -56,10 +57,22 @@ export default function HomeScreen() {
 
   const normalizeFontSize = (size: number) => Math.round(size * scale);
 
+  const onSelectChatting = () => {
+    router.push("../chat/chat");
+  };
+
+  const onSelectCalendar = () => {
+    router.push("/calendar");
+  };
+
+  const onSelectExplore = () => {
+    router.push("/explore");
+  };
+
   return (
     <ScrollView style={[styles.container, { padding: width * 0.1 }]}>
       <View style={styles.userInfoContainer}>
-        <Button title="Back" onPress={() => router.push("../index.tsx")} />
+        <Button title="Back" onPress={() => router.push("../index")} />
         <View style={styles.userNameContainer}>
           <ThemedText
             style={[styles.themedText, { fontSize: normalizeFontSize(16) }]}
@@ -132,45 +145,54 @@ export default function HomeScreen() {
           대하여 신고하실 수 있는 민원입니다.
         </ThemedText>
       </View>
-      <View
-        style={[
-          styles.buttonContainer,
-          { backgroundColor: "blue", height: width * 0.2 },
-        ]}
-      >
-        <ThemedText
-          type="title"
-          lightColor="light"
-          style={{ backgroundColor: "white", fontSize: normalizeFontSize(20) }}
+      <TouchableOpacity onPress={onSelectChatting}>
+        <View
+          style={[
+            styles.buttonContainer,
+            { backgroundColor: "blue", height: width * 0.2 },
+          ]}
         >
-          임금체불 진정서 작성하기
-        </ThemedText>
-      </View>
+          <ThemedText
+            type="title"
+            lightColor="light"
+            style={{
+              backgroundColor: "white",
+              fontSize: normalizeFontSize(20),
+            }}
+          >
+            임금체불 진정서 작성하기
+          </ThemedText>
+        </View>
+      </TouchableOpacity>
       <View style={styles.buttonRow}>
-        <View style={styles.flexButtonContainer}>
-          <ThemedText
-            type="subtitle"
-            lightColor="light"
-            style={{
-              backgroundColor: "white",
-              fontSize: normalizeFontSize(16),
-            }}
-          >
-            근로 증빙 자료
-          </ThemedText>
-        </View>
-        <View style={styles.flexButtonContainer}>
-          <ThemedText
-            type="subtitle"
-            lightColor="light"
-            style={{
-              backgroundColor: "white",
-              fontSize: normalizeFontSize(16),
-            }}
-          >
-            고용장 둘러보기
-          </ThemedText>
-        </View>
+        <TouchableOpacity onPress={onSelectCalendar}>
+          <View style={styles.flexButtonContainer}>
+            <ThemedText
+              type="subtitle"
+              lightColor="light"
+              style={{
+                backgroundColor: "white",
+                fontSize: normalizeFontSize(16),
+              }}
+            >
+              근로 증빙 자료
+            </ThemedText>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={onSelectExplore}>
+          <View style={styles.flexButtonContainer}>
+            <ThemedText
+              type="subtitle"
+              lightColor="light"
+              style={{
+                backgroundColor: "white",
+                fontSize: normalizeFontSize(16),
+              }}
+            >
+              고용장 둘러보기
+            </ThemedText>
+          </View>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );

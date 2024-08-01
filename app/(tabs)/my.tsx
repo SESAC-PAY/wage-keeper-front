@@ -75,14 +75,11 @@ export default function MyPageScreen() {
         </View>
         <Image
           source={countryImgSrc}
-          style={[
-            styles.userImage,
-            {
-              width: width * 0.12,
-              height: width * 0.12,
-              borderRadius: width * 0.06,
-            },
-          ]}
+          style={{
+            width: width * 0.12,
+            height: width * 0.12,
+            borderRadius: width * 0.06,
+          }}
         />
       </View>
       <View style={styles.infoContainer}>
@@ -134,46 +131,6 @@ export default function MyPageScreen() {
         <ThemedText style={{ fontSize: normalizeFontSize(14) }}>
           대하여 신고하실 수 있는 민원입니다.
         </ThemedText>
-      </View>
-      <View
-        style={[
-          styles.buttonContainer,
-          { backgroundColor: "blue", height: width * 0.2 },
-        ]}
-      >
-        <ThemedText
-          type="title"
-          lightColor="light"
-          style={{ backgroundColor: "white", fontSize: normalizeFontSize(20) }}
-        >
-          임금체불 진정서 작성하기
-        </ThemedText>
-      </View>
-      <View style={styles.buttonRow}>
-        <View style={styles.flexButtonContainer}>
-          <ThemedText
-            type="subtitle"
-            lightColor="light"
-            style={{
-              backgroundColor: "white",
-              fontSize: normalizeFontSize(16),
-            }}
-          >
-            근로 증빙 자료
-          </ThemedText>
-        </View>
-        <View style={styles.flexButtonContainer}>
-          <ThemedText
-            type="subtitle"
-            lightColor="light"
-            style={{
-              backgroundColor: "white",
-              fontSize: normalizeFontSize(16),
-            }}
-          >
-            고용장 둘러보기
-          </ThemedText>
-        </View>
       </View>
     </ScrollView>
   );
