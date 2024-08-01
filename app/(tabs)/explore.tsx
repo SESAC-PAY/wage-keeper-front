@@ -1,16 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Text, StyleSheet, View, Dimensions, TextInput, Image, TouchableOpacity } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { SERVER_URL } from '@/shared/constants';
+import { useRouter } from 'expo-router';
+
+const { width } = Dimensions.get('window');
 
 const initialCompanyLocation = {
+  companyId: null,
   latitude: 37.5665256,
   longitude: 127.0092236,
   title: '',
   description: '',
-  employerName: '', 
-  imageUrl: 'https://via.placeholder.com/100', 
+  employerName: '',
+  imageUrl: 'https://via.placeholder.com/100',
 };
 
 export default function ExploreScreen() {
@@ -24,6 +28,8 @@ export default function ExploreScreen() {
     longitudeDelta: 0.01,
   });
 
+  const router = useRouter();
+
   const handleSearch = () => {
     if (searchWord) {
       fetch(`${SERVER_URL}/api/company?searchWord=${searchWord}`)
@@ -32,6 +38,7 @@ export default function ExploreScreen() {
           if (data.status === 200) {
             const { companyInfo, companyLocation } = data.data;
             setCompanyLocation({
+              companyId: companyInfo.id,
               latitude: companyLocation.latitude,
               longitude: companyLocation.longitude,
               title: companyInfo.companyName,
@@ -42,20 +49,26 @@ export default function ExploreScreen() {
             setRegion({
               latitude: companyLocation.latitude,
               longitude: companyLocation.longitude,
-              latitudeDelta: 0.02, 
+              latitudeDelta: 0.02,
               longitudeDelta: 0.01,
             });
-            setIsInfoVisible(true); 
+            setIsInfoVisible(true);
           } else {
-            setIsInfoVisible(false); 
+            setIsInfoVisible(false);
           }
         })
         .catch(error => {
           console.error('Error fetching company info:', error);
-          setIsInfoVisible(false); 
+          setIsInfoVisible(false);
         });
     } else {
-      setIsInfoVisible(false); 
+      setIsInfoVisible(false);
+    }
+  };
+
+  const handleSelect = () => {
+    if (companyLocation.companyId) {
+      router.push(`/info?id=${companyLocation.companyId}`);
     }
   };
 
@@ -90,9 +103,9 @@ export default function ExploreScreen() {
         <View style={styles.infoOverlay}>
           <View style={styles.infoContent}>
             <View style={styles.infoDetails}>
-            <View style={styles.imageContainer}>
-              <Image source={{ uri: companyLocation.imageUrl }} style={styles.companyImage} />
-            </View>
+              <View style={styles.imageContainer}>
+                <Image source={{ uri: companyLocation.imageUrl }} style={styles.companyImage} />
+              </View>
               <View style={styles.infoTextContainer}>
                 <Text style={styles.infoTitle}>{companyLocation.title}</Text>
                 <Text style={styles.infoDescription}>{companyLocation.description}</Text>
@@ -100,7 +113,10 @@ export default function ExploreScreen() {
               </View>
             </View>
             <View style={styles.separator} />
-            <TouchableOpacity style={styles.button} onPress={() => alert('버튼 클릭됨')}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleSelect}
+            >
               <Text style={styles.buttonText}>선택하기</Text>
             </TouchableOpacity>
           </View>
@@ -163,19 +179,17 @@ const styles = StyleSheet.create({
     padding: 10,
     elevation: 5,
   },
-  
   infoDetails: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-
   imageContainer: {
     width: 70,
     height: 70,
     borderRadius: 35,
     borderWidth: 1,
     borderColor: '#ddd',
-    overflow: 'hidden', 
+    overflow: 'hidden',
     marginRight: 10,
     marginLeft: 20,
     marginTop: 10,
@@ -184,9 +198,8 @@ const styles = StyleSheet.create({
   companyImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'contain', 
+    resizeMode: 'contain',
   },
-
   infoTextContainer: {
     flex: 1,
   },
