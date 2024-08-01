@@ -16,7 +16,11 @@ import { fetchSentence } from "@/components/chat/fetchSentence";
 import { useRecoilState, useResetRecoilState, useRecoilValue } from "recoil";
 import { chatState } from "@/shared/recoil/messages";
 import { fetchWorkspace } from "@/components/chat/fetchWorkspace";
-import { isStepDone } from "@/components/chat/isStepDone";
+import { postSentence } from "@/components/chat/postSentence";
+
+export const isStepDone = (sentence: string): boolean => {
+  return sentence.includes("좋아요. 다음으로 넘어갑시다.");
+};
 
 export default function ChatScreen() {
   const [inputText, setInputText] = useState<string>("");
@@ -26,6 +30,7 @@ export default function ChatScreen() {
   const resetChat = useResetRecoilState(chatState);
   const navigation = useNavigation();
   const scrollViewRef = useRef<ScrollView>(null);
+  const stepScrollViewRef = useRef<ScrollView>(null);
   const [isFirst, setIsFirst] = useState(true);
 
   useEffect(() => {
@@ -44,6 +49,13 @@ export default function ChatScreen() {
     };
 
     initFetch();
+
+    return () => {
+      setChat((prev) => ({
+        ...prev,
+        step: 1,
+      }));
+    };
   }, []);
 
   useEffect(() => {
@@ -51,6 +63,15 @@ export default function ChatScreen() {
       scrollViewRef.current.scrollToEnd({ animated: true });
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (stepScrollViewRef.current) {
+      stepScrollViewRef.current.scrollTo({
+        x: (chat.step - 1) * 100,
+        animated: true,
+      });
+    }
+  }, [chat.step]);
 
   const onClickMic = () => {
     alert("마이크 누름!");
@@ -62,23 +83,32 @@ export default function ChatScreen() {
 
   const handleSend = async () => {
     if (inputText.trim()) {
-      setMessages((prevMessages) => [...prevMessages, inputText]);
+      const userMessage = inputText;
+      setMessages((prevMessages) => [...prevMessages, userMessage]);
       setInputText("");
       setLoading(true);
 
-      const sentence = await fetchSentence(isFirst, chat.step, chat.workspace);
-      setMessages((prevMessages) => [...prevMessages, sentence]);
+      await postSentence(userMessage, chat.workspace);
+
+      let sentence = await fetchSentence(isFirst, chat.step, chat.workspace);
+      let updatedMessages = [...messages, userMessage, sentence];
 
       if (isStepDone(sentence)) {
-        setIsFirst(true);
         setChat((prevChat) => ({
           ...prevChat,
           step: prevChat.step + 1,
         }));
+        const nextSentence = await fetchSentence(
+          true,
+          chat.step,
+          chat.workspace,
+        );
+        updatedMessages[updatedMessages.length - 1] += ` ${nextSentence}`;
       } else {
         setIsFirst(false);
       }
 
+      setMessages(updatedMessages);
       setLoading(false);
     }
   };
@@ -107,7 +137,13 @@ export default function ChatScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 80} // Adjust this value as needed
     >
-      <View style={styles.stepContainer}>
+      <ScrollView
+        horizontal
+        style={styles.stepScrollView}
+        contentContainerStyle={styles.stepContainer}
+        ref={stepScrollViewRef}
+        showsHorizontalScrollIndicator={false}
+      >
         <View style={getContainerStyle(1)}>
           <Text style={getTextStyle(1)}>피해 사실</Text>
         </View>
@@ -123,7 +159,7 @@ export default function ChatScreen() {
         <View style={getContainerStyle(5)}>
           <Text style={getTextStyle(5)}>완료</Text>
         </View>
-      </View>
+      </ScrollView>
       <ScrollView
         style={styles.chatContainer}
         contentContainerStyle={{ paddingBottom: 60 }}
@@ -185,6 +221,9 @@ export default function ChatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  stepScrollView: {
+    flexGrow: 0,
   },
   stepContainer: {
     flexDirection: "row",

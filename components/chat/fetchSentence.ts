@@ -7,12 +7,19 @@ export const fetchSentence = async (
   workspace: number,
 ): Promise<string> => {
   try {
-    const response = await client.get(
-      `/api/message/stream/${workspace}/${step - 1}/${isFirst}`,
-    );
-    const data = response.data;
-    alert(data);
-    return data;
+    if (step === 5) {
+      const response = await client.get(
+        `/api/message/stream/${workspace}/${step - 1}/false`,
+      );
+      const data = response.data;
+      return data;
+    } else {
+      const response = await client.get(
+        `/api/message/stream/${workspace}/${step - 1}/${isFirst}`,
+      );
+      const data = response.data;
+      return data;
+    }
   } catch (error) {
     console.error("Error fetching sentence", error);
     return "";
