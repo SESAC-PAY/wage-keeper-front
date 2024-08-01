@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, FlatList, ActivityIndicator, Modal, TouchableOpacity,ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useRoute } from '@react-navigation/native';
 import { SERVER_URL } from '@/shared/constants';
 
 export default function InfoScreen() {
-  const companyId = 40; // 임시로 고정된 회사 ID
+ 
+  const route = useRoute();
+  const companyId = Number(route.params?.id);
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
   const router = useRouter();
-
-  const languageCode = "ko";
 
   const languageCodeMap: { [key: string]: string } = {
     '한국어': 'ko',
@@ -23,35 +24,42 @@ export default function InfoScreen() {
     'O\'zbekcha': 'uz',
     'ខ្មែរ': 'km'
   };
- 
+
+  const getLanguageCode = (language: string | null): string => {
+    return language ? languageCodeMap[language] || 'en' : 'en'; 
+  };
+
   useEffect(() => {
-    if (companyId && selectedLanguage) {
-      const languageCode = languageCodeMap[selectedLanguage];
-      setLoading(true);
-      fetch(`${SERVER_URL}/api/review/${companyId}?language=${languageCode}`)
-        .then(response => response.json())
-        .then(result => {
-          if (result.status === 200) {
-            setData(result.data);
-          } else {
-            setError('데이터를 불러오는 데 실패했습니다.');
-          }
-        })
-        .catch(() => {
+    setLoading(true);
+    const languageCode = getLanguageCode(selectedLanguage); 
+    fetch(`${SERVER_URL}/api/review/${companyId}?language=${languageCode}`)
+      .then(response => response.json())
+      .then(result => {
+        if (result.status === 200) {
+          setData(result.data);
+        } else {
           setError('데이터를 불러오는 데 실패했습니다.');
-        })
-        .finally(() => setLoading(false));
-    }
-  }, [companyId, selectedLanguage]);
+        }
+      })
+      .catch(() => {
+        setError('데이터를 불러오는 데 실패했습니다.');
+      })
+      .finally(() => setLoading(false));
+  }, [selectedLanguage]);
 
   useEffect(() => {
     if (isModalVisible && selectedLanguage === null) {
+
       const defaultLanguage = 'English'; 
       setSelectedLanguage(defaultLanguage);
       setIsModalVisible(false); 
     }
   }, [isModalVisible, selectedLanguage]);
 
+  const handleLanguageSelection = (language: string) => {
+    setSelectedLanguage(language);
+    setIsModalVisible(false);
+  };
 
   if (loading) {
     return (
@@ -107,9 +115,9 @@ export default function InfoScreen() {
     return (
       <View style={styles.starsContainer}>
         {[...Array(totalStars)].map((_, index) => {
-          let starColor = '#ddd'; 
+          let starColor = '#ddd'; // 기본색상
           if (index < fullStars) {
-            starColor = '#4894FE'; 
+            starColor = '#4894FE'; // 채워진 별 색상
           }
           return (
             <Text key={index} style={[styles.star2, { color: starColor }]}>
@@ -131,7 +139,7 @@ export default function InfoScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => setIsModalVisible(true)}>
-          <Text style={styles.languageButton}>   언어 선택</Text>
+          <Text style={styles.languageButton}> >  언어 선택</Text>
         </TouchableOpacity>
       </View>
 
@@ -405,27 +413,27 @@ const styles = StyleSheet.create({
     ratingContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'flex-start', 
+      justifyContent: 'flex-start', // 별점과 별을 왼쪽으로 정렬
       marginVertical: 5,
     },
     starsContainer: {
       flexDirection: 'row',
-
+      //alignItems: 'center',
     },
     star: {
-      fontSize: 20, 
-      lineHeight: 20, 
+      fontSize: 20, // 별의 크기
+      lineHeight: 20, // 별의 높이 맞추기
       color: '#4894FE',
     },
     ratingValue: {
       fontSize: 15,
       fontWeight: 'bold',
-      marginLeft: 5, 
+      marginLeft: 5, // 별과 점수 사이의 간격 조정
     },
     starsWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'flex-end', 
+        justifyContent: 'flex-end', // 별점을 오른쪽으로 정렬
       },
     separator: {
       borderBottomWidth: 1,
@@ -583,5 +591,8 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
       },
 
+
+
+
+
   });
-  
