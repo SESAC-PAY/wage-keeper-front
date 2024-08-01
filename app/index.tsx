@@ -32,7 +32,6 @@ export default function CountryScreen() {
   return (
     <ScrollView style={[styles.container, { padding: width * 0.05 }]}>
       <View style={styles.userNameContainer}>
-        <Button title="Pop" onPress={() => router.replace("../(tabs)//home")} />
         <ThemedText
           type="subtitle"
           style={{ fontSize: normalizeFontSize(12), color: "#585656" }}
