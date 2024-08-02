@@ -12,7 +12,7 @@ export const fetchSentence = async (
         `/api/message/stream/${workspace}/${step - 1}/false`,
       );
       const data = response.data;
-      return data;
+      return `${data} https://projectpanda.ngrok.io/api/document/${workspace}`;
     } else {
       const response = await client.get(
         `/api/message/stream/${workspace}/${step - 1}/${isFirst}`,
