@@ -1,7 +1,7 @@
 
 <h1 align="center">
   <br>
-  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="/assets/images/static/wage-keeper-logo.png" alt="임금지킴이 로고" width="200"></a>
+  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="/assets/images/static/wage_keeper_logo.png" alt="임금지킴이 로고" width="200"></a>
   <br>
   임금지킴이(Wage Keeper)
   <br>
