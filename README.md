@@ -1,7 +1,7 @@
 
 <h1 align="center">
   <br>
-  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="/assets/imgae/static/logo.png" alt="임금지킴이 로고" width="200"></a>
+  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="/assets/images/static/logo.png" alt="임금지킴이 로고" width="200"></a>
   <br>
   임금지킴이(Wage Keeper)
   <br>
@@ -21,11 +21,11 @@
 ## Preview
 ![screenshot](/assets/imgae/static/wageKeeper.gif)
 
-<a href="/src/main/resources/static/example/document.pdf"><img src="/assets/imgae/static/document1.png" alt="진정서" width="800"></a>
-<a href="/src/main/resources/static/example/document.pdf"><img src="/assets/imgae/static/document2.png" alt="진정서" width="800"></a>
+<a href="/assets/images/static/example/document.pdf"><img src="/assets/images/static/document1.png" alt="진정서" width="800"></a>
+<a href="/assets/images/static/example/document.pdf"><img src="/assets/images/static/document2.png" alt="진정서" width="800"></a>
 
 ## Background
-<a href="/src/main/resources/static/example/document.pdf"><img src="/assets/imgae/static/motivation.png" alt="개발 동기" width="900"></a>
+<a href="/assets/images/static/document.pdf"><img src="/assets/images/static/motivation.png" alt="개발 동기" width="900"></a>
 
 ## Key Features
 
